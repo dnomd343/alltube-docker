@@ -24,14 +24,10 @@ FROM ${ALPINE}
 # TODO: remove php-json after php8 (>=alpine:3.16)
 # TODO: /usr/bin/python already exist after alpine:3.17
 RUN apk add --no-cache nginx python3 php-fpm php-mbstring \
-      php-dom php-gmp php-xml php-intl php-json php-gettext php-simplexml php-tokenizer php-xmlwriter
-
+      php-dom php-gmp php-xml php-intl php-json php-gettext php-simplexml php-tokenizer php-xmlwriter && \
+    ln -s /usr/bin/python3 /usr/bin/python
 COPY --from=build /alltube/ /var/www/alltube/
-
-#RUN apk add php-zip
-#RUN
-#    mv -f /var/www/alltube/nginx.conf /etc/nginx/ && \
-#    mv /var/www/alltube/init.sh / && \
-
-#EXPOSE 80
-#CMD ["sh","init.sh"]
+COPY ./init.sh /usr/bin/alltube
+COPY ./nginx/ /etc/nginx/
+EXPOSE 80
+ENTRYPOINT ["alltube"]
