@@ -25,7 +25,9 @@ FROM ${ALPINE}
 # TODO: /usr/bin/python already exist after alpine:3.17
 RUN apk add --no-cache nginx python3 php-fpm php-mbstring \
       php-dom php-gmp php-xml php-intl php-json php-gettext php-simplexml php-tokenizer php-xmlwriter && \
-    ln -s /usr/bin/python3 /usr/bin/python
+    ln -s /usr/bin/python3 /usr/bin/python && \
+    sed -i '/error_log/a\error_log = /dev/stdout' /etc/php7/php-fpm.conf && \
+    sed -i 's?127.0.0.1:9000?/run/php-fpm.sock?' /etc/php7/php-fpm.d/www.conf
 COPY --from=build /alltube/ /var/www/alltube/
 COPY ./init.sh /usr/bin/alltube
 COPY ./nginx/ /etc/nginx/
