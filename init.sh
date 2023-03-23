@@ -17,7 +17,7 @@ fi
 
 if [ "$STREAM" = "TRUE" ] || [ "$STREAM" = "ON" ]; then
   echo "Stream enabled"
-  sed -i "s,^stream:.*,stream: true," "${CONFIG}"
+  sed -i "s,^stream:.*,stream: ask," "${CONFIG}"
 fi
 
 if [ "$CONVERT" = "TRUE" ] || [ "$CONVERT" = "ON" ]; then
