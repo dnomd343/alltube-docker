@@ -21,6 +21,8 @@ COPY --from=composer /composer.phar /usr/bin/composer
 WORKDIR ./alltube-${ALLTUBE}/
 RUN composer install --no-interaction --optimize-autoloader --no-dev
 RUN mv ./config/config.example.yml ./config/config.yml
+COPY ./attach.css /tmp/
+RUN cat /tmp/attach.css >> ./css/style.css
 RUN chmod 777 ./templates_c/
 RUN mv $(pwd) /alltube/
 

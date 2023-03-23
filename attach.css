@@ -1,0 +1,13 @@
+
+.bookmarklet_wrapper {
+    display: none;
+}
+
+footer.small-font:hover {
+    opacity: 1;
+}
+
+footer.small-font {
+    opacity: 0;
+    transition: opacity .6s;
+}
