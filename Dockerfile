@@ -36,7 +36,7 @@ COPY ./init.sh /release/usr/bin/alltube
 COPY ./nginx/ /release/etc/nginx/
 
 FROM ${ALPINE}
-RUN apk add --no-cache nginx python3 php-fpm php-json php-mbstring \
+RUN apk add --no-cache nginx ffmpeg python3 php-fpm php-json php-mbstring php-openssl \
       php-dom php-gmp php-xml php-intl php-gettext php-simplexml php-tokenizer php-xmlwriter
 COPY --from=build /release/ /
 EXPOSE 80
