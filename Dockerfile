@@ -1,35 +1,43 @@
 ARG ALPINE="alpine:3.15"
 
-FROM ${ALPINE} as composer
 # TODO: remove php-json after php8 (>=alpine:3.16)
-RUN apk add php php-phar php-iconv php-openssl php-json
-RUN wget https://install.phpcomposer.com/installer
-RUN php installer
+# TODO: /usr/bin/python already exist (>=alpine:3.17)
 
-FROM ${ALPINE} as build
+FROM ${ALPINE} AS composer
+RUN apk add php-json php-phar php-mbstring php-openssl
+RUN wget https://install.phpcomposer.com/installer -O - | php
+
+FROM ${ALPINE} AS yt-dlp
+ENV YTDLP="2023.03.04"
+RUN wget https://github.com/yt-dlp/yt-dlp/releases/download/${YTDLP}/yt-dlp
+RUN chmod +x yt-dlp
+
+FROM ${ALPINE} AS alltube
+RUN apk add php-json php-phar php-mbstring php-openssl
+RUN apk add patch php-dom php-gmp php-xml php-intl php-gettext php-simplexml php-tokenizer php-xmlwriter
 ENV ALLTUBE="3.1.1"
-RUN apk add php php-phar php-mbstring php-openssl
-# TODO: remove php-json after php8 (>=alpine:3.16)
-RUN apk add php-dom php-gmp php-xml php-intl php-json php-gettext php-simplexml php-tokenizer php-xmlwriter
-RUN wget https://github.com/Rudloff/alltube/releases/download/${ALLTUBE}/alltube-${ALLTUBE}.zip && \
-    unzip alltube-${ALLTUBE}.zip
+RUN wget https://github.com/Rudloff/alltube/archive/${ALLTUBE}.tar.gz -O - | tar xzf -
 COPY --from=composer /composer.phar /usr/bin/composer
-WORKDIR ./alltube/
-RUN composer install --prefer-dist --no-progress --no-dev --optimize-autoloader
+WORKDIR ./alltube-${ALLTUBE}/
+RUN composer install --no-interaction --optimize-autoloader --no-dev
+RUN mv ./config/config.example.yml ./config/config.yml
 RUN chmod 777 ./templates_c/
-WORKDIR ./config/
-RUN mv ./config.example.yml ./config.yml
+RUN mv $(pwd) /alltube/
+
+FROM ${ALPINE} AS build
+RUN apk add php-fpm
+WORKDIR /release/usr/bin/
+RUN ln -s /usr/bin/python3 /release/usr/bin/python
+WORKDIR /release/etc/php7/php-fpm.d/
+RUN sed 's?127.0.0.1:9000?/run/php-fpm.sock?' /etc/php7/php-fpm.d/www.conf > www.conf
+COPY --from=alltube /alltube/ /release/var/www/alltube/
+COPY --from=yt-dlp /yt-dlp /release/usr/bin/
+COPY ./init.sh /release/usr/bin/alltube
+COPY ./nginx/ /release/etc/nginx/
 
 FROM ${ALPINE}
-# TODO: remove php-json after php8 (>=alpine:3.16)
-# TODO: /usr/bin/python already exist after alpine:3.17
-RUN apk add --no-cache nginx python3 php-fpm php-mbstring \
-      php-dom php-gmp php-xml php-intl php-json php-gettext php-simplexml php-tokenizer php-xmlwriter && \
-    ln -s /usr/bin/python3 /usr/bin/python && \
-    sed -i '/error_log/a\error_log = /dev/stdout' /etc/php7/php-fpm.conf && \
-    sed -i 's?127.0.0.1:9000?/run/php-fpm.sock?' /etc/php7/php-fpm.d/www.conf
-COPY --from=build /alltube/ /var/www/alltube/
-COPY ./init.sh /usr/bin/alltube
-COPY ./nginx/ /etc/nginx/
+RUN apk add --no-cache nginx python3 php-fpm php-json php-mbstring \
+      php-dom php-gmp php-xml php-intl php-gettext php-simplexml php-tokenizer php-xmlwriter
+COPY --from=build /release/ /
 EXPOSE 80
 ENTRYPOINT ["alltube"]
