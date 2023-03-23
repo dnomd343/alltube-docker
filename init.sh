@@ -26,5 +26,7 @@ if [ "$CONVERT" = "TRUE" ] || [ "$CONVERT" = "ON" ]; then
   sed -i "s,^convertAdvanced:.*,convertAdvanced: true," "${CONFIG}"
 fi
 
+echo "yt-dlp version: $(yt-dlp --version)"
+
 /usr/sbin/nginx
 exec /usr/sbin/php-fpm7 -F
