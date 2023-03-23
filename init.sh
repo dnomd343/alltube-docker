@@ -5,11 +5,6 @@ CONFIG="/var/www/alltube/config/config.yml"
 sed -i "s,^audioBitrate:.*,audioBitrate: 320," "${CONFIG}"
 sed -i "s,^youtubedl:.*,youtubedl: /usr/bin/yt-dlp," "${CONFIG}"
 
-if [ -n "$TITLE" ]; then
-  echo "Title: ${TITLE}"
-  sed -i "s,^appName:.*,appName: ${TITLE}," "${CONFIG}"
-fi
-
 if [ "$REMUX" = "TRUE" ] || [ "$REMUX" = "ON" ]; then
   echo "Remux enabled"
   sed -i "s,^remux:.*,remux: true," "${CONFIG}"
@@ -26,7 +21,14 @@ if [ "$CONVERT" = "TRUE" ] || [ "$CONVERT" = "ON" ]; then
   sed -i "s,^convertAdvanced:.*,convertAdvanced: true," "${CONFIG}"
 fi
 
+if [ -n "$TITLE" ]; then
+  echo "Title: ${TITLE}"
+  sed -i "s,^appName:.*,appName: ${TITLE}," "${CONFIG}"
+fi
+
 echo "yt-dlp version: $(yt-dlp --version)"
+
+echo "Alltube service is running..."
 
 /usr/sbin/nginx
 exec /usr/sbin/php-fpm7 -F
