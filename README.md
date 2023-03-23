@@ -20,6 +20,8 @@ After the command is run, *Alltube* will work on `tcp/24488`, of course, this po
 
 + `CONVERT=ON` ：Enabled audio conversion.
 
++ `PORT=...` ：Specify the service port, default in `80`
+
 Here is an example:
 
 ```bash
@@ -28,7 +30,8 @@ docker run -d --restart always --name alltube \
   --env CONVERT=ON \
   --env STREAM=ON \
   --env REMUX=ON \
-  -p 24488:80 dnomd343/alltube
+  --env PORT=24488 \
+  --network host dnomd343/alltube
 ```
 
 Next, configure your web server reverse proxy to `localhost:24488`, let's take *Nginx* as an example here.
