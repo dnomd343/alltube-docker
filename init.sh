@@ -6,7 +6,7 @@ NGINX_CONFIG="/etc/nginx/alltube.conf"
 CONFIG="/var/www/alltube/config/config.yml"
 
 sed -i "s,^audioBitrate:.*,audioBitrate: 320," "${CONFIG}"
-#sed -i "s,^youtubedl:.*,youtubedl: /usr/bin/yt-dlp," "${CONFIG}"
+sed -i "s,^youtubedl:.*,youtubedl: /usr/bin/yt-dlp," "${CONFIG}"
 
 if [ -n "${PORT}" ]; then
   echo "Port: ${PORT}"
@@ -36,7 +36,7 @@ if [ -n "${TITLE}" ]; then
   sed -i "s,^appName:.*,appName: ${TITLE}," "${CONFIG}"
 fi
 
-#echo "yt-dlp version: $(yt-dlp --version)"
+echo "yt-dlp version: $(yt-dlp --version)"
 
 echo "Alltube service is running..."
 
