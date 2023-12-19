@@ -49,16 +49,18 @@ server {
     ssl_certificate /etc/ssl/certs/343.re/fullchain.pem;  # TLS certificate of your domain
     ssl_certificate_key /etc/ssl/certs/343.re/privkey.pem;  # TLS private key of your domain
     location / {
-        proxy_pass http://127.0.0.1:24488;
+        proxy_http_version 1.1;
+        proxy_set_header Connection '';
         proxy_set_header Host $http_host;
         proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_pass http://127.0.0.1:24488;
     }
 }
 ```
 
 Finally, use the `nginx -s reload` command to take effect, visit your domain name and enjoy it!
 
-### Advanced
+## Advanced
 
 If necessary, you can use the following command to build the image yourself.
 
@@ -70,8 +72,14 @@ Due to the stagnation of the [youtube-dl](https://github.com/ytdl-org/youtube-dl
 
 If you don't need the conversion function, you can remove the installation of `ffmpeg`, which will reduce the image size to a certain extent.
 
-In addition, the project supports multi-stage builds, using the `buildx` command will speed up the build process.
+In addition, the project supports multi-stage builds, using the `buildx` command will speed up the build process. Below is an example of using `buildx` to build multi-architecture images.
 
-### License
+```bash
+docker buildx build -t dnomd343/alltube \
+  --platform="linux/amd64,linux/386,linux/arm64,linux/arm/v7" \
+  https://github.com/dnomd343/alltube-docker.git --push
+```
+
+## License
 
 MIT ©2023 [@dnomd343](https://github.com/dnomd343)
